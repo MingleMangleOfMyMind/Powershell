@@ -1,0 +1,19 @@
+$vc = "vcserver"
+# The coming line assuming that you have already saved your vCenter Credentials into Credentials.xml
+# $cred = Get-VICredentialStoreItem -Host $vc -File c:\scripts\Credentials.xml
+# Connect to your vCenter
+# $vCenter = Connect-VIServer $vc -user $cred.user -Password $cred.password
+$vCenter = Connect-VIServer $vc 
+# Get full list of all ESXi Hosts available under your vCenter server
+$HostsList = Get-VMHost
+# Looping through the whole Hosts list
+foreach ($Hosts in $HostsList)
+{
+	$VMHost = $Hosts.Name
+	Write-Host Setting PSP Default Claim Rule on host $VMHost
+	# Connect to esxcli commands environment on the specific Host
+	$esxcli = Get-EsxCli -VMHost $VMHost
+	$esxcli.storage.nmp.satp.set("TRUE","VMW_PSP_RR","VMW_SATP_EVA")
+}
+# Disconnect from all Hosts & vCenters
+Disconnect-VIServer *
